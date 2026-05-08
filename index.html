@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Debian — The Universal Operating System</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080808;
+    --bg2: #0a0c11;
+    --panel: #0f1117;
+    --border: #1a1f2e;
+    --orange: #ff6b1a;
+    --orange2: #f86903;
+    --red: #cc0000;
+    --red2: #a30000;
+    --text: #c8d0e0;
+    --muted: #5a6070;
+    --white: #eef0f5;
+    --green: #2ecc71;
+    --mono: 'JetBrains Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--mono);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  #stars { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+  body::after {
+    content: '';
+    position: fixed; inset: 0; z-index: 9999;
+    background: repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(0,0,0,.06) 3px, rgba(0,0,0,.06) 4px);
+    pointer-events: none;
+  }
+
+  nav {
+    position: sticky; top: 0; z-index: 500;
+    background: rgba(8,8,8,.95);
+    border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(16px);
+    display: flex; align-items: center;
+  }
+  .nav-logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 22px; border-right: 1px solid var(--border);
+    font-family: var(--sans); font-weight: 800; font-size: 1.1rem;
+    color: var(--white); text-decoration: none; transition: color .2s;
+  }
+  .nav-logo:hover { color: var(--red); }
+  .swirl {
+    color: var(--red); font-size: 1.5rem;
+    display: inline-block; animation: spin-logo 8s linear infinite;
+  }
+  @keyframes spin-logo { from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  .nav-links { display: flex; }
+  .nav-links a {
+    padding: 14px 18px; color: var(--muted); text-decoration: none;
+    font-size: .78rem; letter-spacing: .05em;
+    transition: color .2s, background .2s;
+    border-right: 1px solid var(--border); position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+    height: 2px; background: var(--orange);
+    transform: scaleX(0); transition: transform .25s;
+  }
+  .nav-links a:hover { color: var(--orange); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+  .nav-search { margin-left: auto; display: flex; padding: 8px 16px; }
+  .nav-search input {
+    background: var(--panel); border: 1px solid var(--border); border-right: none;
+    color: var(--text); font-family: var(--mono); font-size: .75rem;
+    padding: 6px 12px; outline: none; width: 200px; transition: border-color .2s;
+  }
+  .nav-search input:focus { border-color: var(--orange); }
+  .nav-search button {
+    background: var(--orange); border: none; color: #000;
+    font-family: var(--mono); font-size: .75rem; font-weight: 700;
+    padding: 7px 14px; cursor: pointer; transition: background .2s;
+  }
+  .nav-search button:hover { background: var(--orange2); }
+
+  .hero {
+    position: relative; z-index: 1;
+    background: linear-gradient(180deg, #0b0f1c 0%, #080808 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 70px 40px 50px; text-align: center; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse 90% 70% at 50% 0%, rgba(204,0,0,.14) 0%, transparent 70%);
+  }
+  .hero-spiral {
+    font-size: 100px; line-height: 1; display: inline-block; color: var(--red);
+    text-shadow: 0 0 60px rgba(204,0,0,.6), 0 0 120px rgba(204,0,0,.25);
+    animation: hero-pulse 3s ease-in-out infinite, hero-float 6s ease-in-out infinite;
+  }
+  @keyframes hero-pulse {
+    0%,100% { text-shadow: 0 0 60px rgba(204,0,0,.6), 0 0 120px rgba(204,0,0,.25); }
+    50%      { text-shadow: 0 0 100px rgba(204,0,0,.9), 0 0 200px rgba(204,0,0,.4); }
+  }
+  @keyframes hero-float {
+    0%,100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+  .hero h1 {
+    font-family: var(--sans); font-weight: 800;
+    font-size: clamp(2.5rem,6vw,4rem); color: var(--white);
+    margin-top: 18px; letter-spacing: -.03em;
+    animation: fade-up .8s ease both .2s;
+  }
+  .hero h1 span { color: var(--red); }
+  .hero-sub {
+    margin-top: 10px; font-size: .82rem; color: var(--muted);
+    letter-spacing: .15em; text-transform: uppercase;
+    animation: fade-up .8s ease both .4s;
+  }
+  .hero-badges {
+    display: flex; justify-content: center; gap: 12px;
+    margin-top: 24px; flex-wrap: wrap;
+    animation: fade-up .8s ease both .6s;
+  }
+  .badge {
+    background: var(--panel); border: 1px solid var(--border);
+    color: var(--muted); font-size: .65rem; padding: 5px 12px;
+    letter-spacing: .08em; text-transform: uppercase;
+    transition: border-color .2s, color .2s;
+  }
+  .badge:hover { border-color: var(--orange); color: var(--orange); }
+  @keyframes fade-up {
+    from { opacity:0; transform:translateY(20px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  .wrapper { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 52px 24px; }
+
+  .reveal { opacity: 0; transform: translateY(32px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 28px; }
+  @media(max-width:900px){ .two-col{ grid-template-columns:1fr; } }
+
+  .section-card {
+    background: var(--panel); border: 1px solid var(--border);
+    padding: 30px; position: relative; overflow: hidden;
+  }
+  .section-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--orange), transparent);
+    opacity: 0; transition: opacity .3s;
+  }
+  .section-card:hover::before { opacity: 1; }
+  .section-title {
+    font-family: var(--sans); font-weight: 800; font-size: 1.35rem;
+    color: var(--white); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 4px;
+  }
+  .section-sub { font-size: .72rem; color: var(--muted); margin-bottom: 24px; }
+
+  .carousel { position: relative; overflow: hidden; margin-bottom: 20px; }
+  .carousel-inner { display: flex; transition: transform .55s cubic-bezier(.25,.8,.25,1); }
+  .carousel-slide {
+    min-width: 100%; height: 200px;
+    background: var(--bg2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+  }
+  .slide-placeholder { display: flex; flex-direction: column; align-items: center; gap: 10px; color: var(--muted); font-size: .78rem; }
+  .slide-placeholder .icon { font-size: 3rem; }
+  .slide-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(0,0,0,.85); border: 1px solid var(--border);
+    color: var(--muted); font-size: .62rem; padding: 4px 8px; letter-spacing: .05em;
+  }
+  .carousel-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(10,12,17,.92); border: 1px solid var(--border);
+    color: var(--orange); width: 34px; height: 34px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1.1rem; z-index: 10;
+    transition: background .2s, border-color .2s;
+  }
+  .carousel-btn:hover { background: var(--orange); color: #000; border-color: var(--orange); }
+  .carousel-btn.prev { left: 8px; }
+  .carousel-btn.next { right: 8px; }
+  .carousel-dots { display: flex; justify-content: center; gap: 7px; margin-top: 8px; }
+  .dot { width: 6px; height: 6px; background: var(--border); border-radius: 50%; cursor: pointer; transition: background .25s, transform .25s; }
+  .dot.active { background: var(--orange); transform: scale(1.4); }
+
+  .link-list { display: flex; flex-direction: column; gap: 2px; }
+  .link-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 11px 12px; border: 1px solid transparent;
+    text-decoration: none; transition: background .2s, border-color .2s, transform .15s;
+  }
+  .link-item:hover { background: rgba(255,107,26,.05); border-color: rgba(255,107,26,.15); transform: translateX(4px); }
+  .link-icon {
+    width: 34px; height: 34px; min-width: 34px;
+    background: var(--bg2); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .95rem; color: var(--muted); transition: border-color .2s, color .2s;
+  }
+  .link-item:hover .link-icon { border-color: var(--orange); color: var(--orange); }
+  .link-text strong { display: block; color: var(--orange); font-size: .82rem; font-family: var(--sans); font-weight: 600; margin-bottom: 1px; }
+  .link-text span { font-size: .7rem; color: var(--muted); }
+
+  .dl-center { display: flex; flex-direction: column; align-items: center; margin-bottom: 22px; }
+  .dl-rings { width: 140px; height: 140px; position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; }
+  .ring { position: absolute; border-radius: 50%; border: 2px solid var(--red2); animation: ring-pulse 3s ease-in-out infinite; }
+  .ring:nth-child(1) { width: 140px; height: 140px; animation-delay:0s; opacity:.5; }
+  .ring:nth-child(2) { width: 110px; height: 110px; animation-delay:.4s; opacity:.7; }
+  .ring:nth-child(3) { width: 80px; height: 80px; animation-delay:.8s; opacity:1; border-color: var(--red); }
+  @keyframes ring-pulse {
+    0%,100% { box-shadow: 0 0 8px rgba(204,0,0,.3); }
+    50%      { box-shadow: 0 0 30px rgba(204,0,0,.7); }
+  }
+  .dl-icon {
+    width: 50px; height: 50px; z-index: 2; position: relative;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem; color: var(--red); animation: hero-float 4s ease-in-out infinite;
+  }
+  .dl-btn {
+    display: block; width: 100%; padding: 16px;
+    background: linear-gradient(135deg, var(--red2), var(--red));
+    border: none; color: #fff; font-family: var(--sans); font-weight: 700;
+    font-size: 1rem; letter-spacing: .1em; text-transform: uppercase;
+    cursor: pointer; text-decoration: none; text-align: center;
+    position: relative; overflow: hidden;
+    transition: transform .15s, box-shadow .2s;
+    box-shadow: 0 4px 24px rgba(204,0,0,.3);
+  }
+  .dl-btn::after {
+    content: ''; position: absolute; top: -50%; left: -60%;
+    width: 40%; height: 200%; background: rgba(255,255,255,.15);
+    transform: skewX(-20deg); animation: shimmer 3s ease-in-out infinite;
+  }
+  @keyframes shimmer { 0%{left:-60%;} 100%{left:120%;} }
+  .dl-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 32px rgba(204,0,0,.5); }
+  .dl-alt { text-align: center; margin-top: 8px; font-size: .7rem; color: var(--muted); }
+  .dl-alt a { color: var(--orange); text-decoration: none; }
+
+  .prompt {
+    font-size: .72rem; color: var(--muted);
+    margin-top: 18px; display: flex; align-items: center; gap: 6px;
+    border-top: 1px solid var(--border); padding-top: 14px;
+  }
+  .prompt .ps1 { color: var(--orange); font-weight: 700; }
+  .cursor { width: 8px; height: 13px; background: var(--orange); opacity: .9; display: inline-block; animation: blink 1s step-end infinite; }
+  @keyframes blink { 0%,100%{opacity:.9;} 50%{opacity:0;} }
+
+  /* ── INSTALL SECTION ── */
+  .install-section {
+    background: var(--panel); border: 1px solid var(--border);
+    padding: 40px; position: relative; overflow: hidden;
+  }
+  .install-section::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--red2), var(--orange), var(--red2));
+    background-size: 200%;
+    animation: border-run 3s linear infinite;
+  }
+  @keyframes border-run { 0%{background-position:0%;} 100%{background-position:200%;} }
+
+  .install-header { display: flex; align-items: center; gap: 16px; margin-bottom: 8px; }
+  .install-header .icon { font-size: 2rem; }
+  .install-title { font-family: var(--sans); font-weight: 800; font-size: 1.6rem; color: var(--white); letter-spacing: .05em; text-transform: uppercase; }
+  .install-desc { font-size: .78rem; color: var(--muted); margin-bottom: 36px; max-width: 700px; line-height: 1.8; }
+
+  .steps { display: flex; flex-direction: column; gap: 0; }
+  .step { display: grid; grid-template-columns: 48px 1fr; gap: 0 20px; position: relative; }
+  .step-line {
+    position: absolute; left: 23px; top: 48px; bottom: 0;
+    width: 2px; background: var(--border); z-index: 0;
+  }
+  .step-num {
+    width: 48px; height: 48px; min-width: 48px;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--sans); font-weight: 800; font-size: 1rem; color: var(--muted);
+    position: relative; z-index: 1;
+    background: var(--bg2); transition: border-color .3s, color .3s, background .3s;
+  }
+  .step:hover .step-num { border-color: var(--orange); color: var(--orange); background: rgba(255,107,26,.08); }
+  .step-body { padding: 0 0 36px 0; }
+  .step-title {
+    font-family: var(--sans); font-weight: 700; font-size: 1rem; color: var(--white);
+    margin-bottom: 6px; padding-top: 11px; display: flex; align-items: center; gap: 10px;
+  }
+  .step-tag {
+    font-family: var(--mono); font-size: .6rem; font-weight: 400; color: var(--orange);
+    background: rgba(255,107,26,.1); border: 1px solid rgba(255,107,26,.2);
+    padding: 2px 7px; letter-spacing: .05em;
+  }
+  .step-desc { font-size: .75rem; color: var(--muted); line-height: 1.9; margin-bottom: 14px; }
+
+  .code-block {
+    background: #060608; border: 1px solid var(--border);
+    border-left: 3px solid var(--orange);
+    padding: 14px 18px; margin: 10px 0; position: relative; overflow-x: auto;
+    transition: border-left-color .3s;
+  }
+  .code-block:hover { border-left-color: var(--red); }
+  .code-block pre { font-family: var(--mono); font-size: .78rem; color: var(--white); line-height: 1.8; white-space: pre; margin: 0; }
+  .comment { color: #3a4a60; }
+  .cmd     { color: #c8d0e0; }
+  .flag    { color: var(--orange); }
+  .url     { color: #5ba3e0; }
+  .kw      { color: #e06c75; }
+
+  .copy-btn {
+    position: absolute; top: 8px; right: 8px;
+    background: var(--panel); border: 1px solid var(--border);
+    color: var(--muted); font-family: var(--mono); font-size: .6rem;
+    padding: 4px 8px; cursor: pointer; transition: border-color .2s, color .2s;
+  }
+  .copy-btn:hover { border-color: var(--orange); color: var(--orange); }
+
+  .note {
+    display: flex; gap: 10px; align-items: flex-start;
+    background: rgba(255,107,26,.05); border: 1px solid rgba(255,107,26,.15);
+    border-left: 3px solid var(--orange);
+    padding: 10px 14px; margin: 10px 0;
+    font-size: .72rem; color: var(--muted); line-height: 1.7;
+  }
+  .note .ni { font-size: 1rem; flex-shrink: 0; }
+  .note.info { border-left-color: #5ba3e0; background: rgba(91,163,224,.05); border-color: rgba(91,163,224,.15); border-left: 3px solid #5ba3e0; }
+  .note.success { border-left-color: var(--green); background: rgba(46,204,113,.05); border-color: rgba(46,204,113,.15); border-left: 3px solid var(--green); }
+
+  .footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--border); background: var(--panel);
+    padding: 16px 28px; display: flex; align-items: center; justify-content: space-between;
+    font-size: .68rem; color: var(--muted); flex-wrap: wrap; gap: 8px;
+  }
+  .footer a { color: var(--orange); text-decoration: none; }
+  .status-dot {
+    display: inline-block; width: 6px; height: 6px; background: var(--green);
+    border-radius: 50%; margin-right: 6px; animation: blink 2s ease-in-out infinite;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<nav>
+  <a class="nav-logo" href="#"><span class="swirl">⊙</span> debian</a>
+  <div class="nav-links">
+    <a href="#">Blog</a>
+    <a href="#">Krótkie wieści</a>
+    <a href="#">Planeta</a>
+    <a href="#">Wiki</a>
+    <a href="#instalacja">Instalacja</a>
+  </div>
+  <div class="nav-search">
+    <input type="text" placeholder="Szukaj...">
+    <button>Szukaj</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <span class="hero-spiral">⊙</span>
+  <h1>deb<span>ian</span></h1>
+  <p class="hero-sub">The universal operating system</p>
+  <div class="hero-badges">
+    <span class="badge">🟢 Stable: Bookworm 12</span>
+    <span class="badge">🔵 Testing: Trixie</span>
+    <span class="badge">⚪ Unstable: Sid</span>
+    <span class="badge">🔴 Kernel: 6.1 LTS</span>
+  </div>
+</div>
+
+<div class="wrapper">
+  <div class="two-col">
+
+    <div class="section-card reveal">
+      <div class="section-title">Społeczność</div>
+      <div class="section-sub">// debian to społeczność ludzi!</div>
+      <div class="carousel">
+        <div class="carousel-inner" id="ci">
+          <div class="carousel-slide">
+            <div class="slide-placeholder"><span class="icon">👥</span><span>DC25 Group Photo — Brest, France</span></div>
+            <div class="slide-badge">DC25 Group Photo</div>
+          </div>
+          <div class="carousel-slide">
+            <div class="slide-placeholder"><span class="icon">🌍</span><span>Debian Global Community</span></div>
+          </div>
+          <div class="carousel-slide">
+            <div class="slide-placeholder"><span class="icon">🎉</span><span>DebConf26 — Santa Fe, Argentina</span></div>
+          </div>
+        </div>
+        <button class="carousel-btn prev" onclick="slide(-1)">‹</button>
+        <button class="carousel-btn next" onclick="slide(1)">›</button>
+      </div>
+      <div class="carousel-dots" id="dots">
+        <div class="dot active" onclick="goTo(0)"></div>
+        <div class="dot" onclick="goTo(1)"></div>
+        <div class="dot" onclick="goTo(2)"></div>
+      </div>
+      <div class="link-list" style="margin-top:20px;">
+        <a class="link-item" href="#"><div class="link-icon">👥</div><div class="link-text"><strong>Ludzie</strong><span>Kim jesteśmy i co robimy</span></div></a>
+        <a class="link-item" href="#"><div class="link-icon">💡</div><div class="link-text"><strong>Nasza filozofia</strong><span>Dlaczego i w jaki sposób działamy</span></div></a>
+        <a class="link-item" href="#"><div class="link-icon">🤝</div><div class="link-text"><strong>Zaangażuj się, wspieraj</strong><span>Jak możesz do nas dołączyć</span></div></a>
+        <a class="link-item" href="#"><div class="link-icon">☰</div><div class="link-text"><strong>Więcej…</strong><span>Dodatkowe informacje o społeczności</span></div></a>
+      </div>
+      <div class="prompt"><span class="ps1">user@debian:~$</span><span>apt install community</span><span class="cursor"></span></div>
+    </div>
+
+    <div class="section-card reveal" style="transition-delay:.15s;">
+      <div class="section-title">System Operacyjny</div>
+      <div class="section-sub">// debian jest kompletnym wolnym SO!</div>
+      <div class="dl-center">
+        <div class="dl-rings">
+          <div class="ring"></div>
+          <div class="ring"></div>
+          <div class="ring"></div>
+          <div class="dl-icon">⊙</div>
+        </div>
+        <a class="dl-btn" href="https://drive.usercontent.google.com/download?id=1bVFYiMJYpREVkNjAQP88TOMI_3M1x9Sc&export=download&authuser=0">⬇ &nbsp; Pobieranie</a>
+        <div class="dl-alt"><a href="https://www.debian.org/distrib/">Inne wersje ISO</a></div>
+      </div>
+      <div class="link-list">
+        <a class="link-item" href="#"><div class="link-icon">🏆</div><div class="link-text"><strong>Dlaczego Debian</strong><span>Co czyni Debiana wyjątkowym</span></div></a>
+        <a class="link-item" href="#"><div class="link-icon">🛟</div><div class="link-text"><strong>Wsparcie użytkownika</strong><span>Uzyskiwanie pomocy i dokumentacji</span></div></a>
+        <a class="link-item" href="#"><div class="link-icon">🛡️</div><div class="link-text"><strong>Aktualizacje bezpieczeństwa</strong><span>Porady bezpieczeństwa Debiana (DSA)</span></div></a>
+        <a class="link-item" href="#instalacja"><div class="link-icon">📋</div><div class="link-text"><strong>Przewodnik instalacji</strong><span>Krok po kroku — pełny poradnik</span></div></a>
+      </div>
+      <div class="prompt"><span class="ps1">root@debian:~#</span><span>apt upgrade --full-upgrade</span><span class="cursor"></span></div>
+    </div>
+
+  </div>
+
+  <!-- ══════════ INSTALL GUIDE ══════════ -->
+  <div class="install-section reveal" id="instalacja">
+    <div class="install-header">
+      <span class="icon">🖥️</span>
+      <div><div class="install-title">Instalacja Debiana 12</div></div>
+    </div>
+    <p class="install-desc">
+      Kompletny przewodnik instalacji systemu Debian 12 "Bookworm" — od pobrania ISO aż do pierwszego uruchomienia.
+      Każdy krok opisany dokładnie, z komendami gotowymi do skopiowania.
+    </p>
+
+    <div class="steps">
+
+      <div class="step reveal">
+        <div class="step-line"></div>
+        <div class="step-num">01</div>
+        <div class="step-body">
+          <div class="step-title">Pobierz obraz ISO <span class="step-tag">DOWNLOAD</span></div>
+          <p class="step-desc">Wejdź na oficjalną stronę Debiana i pobierz najnowszy obraz instalacyjny. Zalecamy wersję <strong style="color:var(--white)">netinst</strong> (~650MB) — pobiera resztę pakietów przez internet podczas instalacji.</p>
+          <div class="note info"><span class="ni">ℹ️</span>Masz słaby internet? Pobierz pełne DVD (~4GB) — zawiera wszystko offline.</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">KOPIUJ</button>
+            <pre><span class="comment"># Pobierz przez wget (terminal Linux/Mac):</span>
+<span class="cmd">wget </span><span class="url">https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/debian-12.5.0-amd64-netinst.iso</span>
+
+<span class="comment"># Sprawdź sumę kontrolną SHA512:</span>
+<span class="cmd">sha512sum debian-12.5.0-amd64-netinst.iso</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step reveal" style="transition-delay:.08s;">
+        <div class="step-line"></div>
+        <div class="step-num">02</div>
+        <div class="step-body">
+          <div class="step-title">Nagraj ISO na pendrive <span class="step-tag">USB BOOT</span></div>
+          <p class="step-desc">Użyj programu <strong style="color:var(--white)">Rufus</strong> (Windows) lub <strong style="color:var(--white)">Balena Etcher</strong> (Linux/Mac/Win) do nagrania obrazu na pendrive minimum 2GB. Na Linuxie możesz też użyć komendy <code style="color:var(--orange)">dd</code>.</p>
+          <div class="note"><span class="ni">⚠️</span>Pendrive zostanie CAŁKOWICIE wymazany! Zrób backup danych przed nagraniem.</div>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">KOPIUJ</button>
+            <pre><span class="comment"># Linux — nagraj przez dd (zamień /dev/sdX na swój pendrive):</span>
+<span class="kw">sudo</span> <span class="cmd">dd </span><span class="flag">if=</span>debian-12.5.0-amd64-netinst.iso <span class="flag">of=</span>/dev/sdX <span class="flag">bs=</span>4M <span class="flag">status=</span>progress
+<span class="kw">sudo</span> <span class="cmd">sync</span>
+
+<span class="comment"># Sprawdź numer pendrive przed użyciem dd!</span>
+<span class="cmd">lsblk</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step reveal" style="transition-delay:.12s;">
+        <div class="step-line"></div>
+        <div class="step-num">03</div>
+        <div class="step-body">
+          <div class="step-title">Uruchom z USB w BIOS/UEFI <span class="step-tag">BIOS</span></div>
+          <p class="step-desc">Włóż pendrive, uruchom ponownie komputer i wejdź do BIOS/UEFI. Ustaw pendrive jako pierwsze urządzenie bootujące lub użyj Boot Menu (jednorazowy wybór).</p>
+          <div class="code-block">
+            <pre><span class="comment"># Klawisze wejścia do BIOS / Boot Menu:</span>
+<span class="kw">ASUS     </span>→ <span class="flag">F2</span> lub <span class="flag">DEL</span>   (BIOS)  │  <span class="flag">F8</span>   (Boot Menu)
+<span class="kw">GIGABYTE </span>→ <span class="flag">DEL</span>         (BIOS)  │  <span class="flag">F12</span>  (Boot Menu)
+<span class="kw">MSI      </span>→ <span class="flag">DEL</span>         (BIOS)  │  <span class="flag">F11</span>  (Boot Menu)
+<span class="kw">Lenovo   </span>→ <span class="flag">F1</span> lub <span class="flag">F2</span>   (BIOS)  │  <span class="flag">F12</span>  (Boot Menu)
+<span class="kw">HP       </span>→ <span class="flag">F10</span>         (BIOS)  │  <span class="flag">F9</span>   (Boot Menu)
+<span class="kw">Dell     </span>→ <span class="flag">F2</span>          (BIOS)  │  <span class="flag">F12</span>  (Boot Menu)</pre>
+          </div>
+          <div class="note info"><span class="ni">ℹ️</span>UEFI Secure Boot — możesz go wyłączyć lub zostawić, Debian 12 obsługuje Secure Boot natywnie.</div>
+        </div>
+      </div>
+
+      <div class="step reveal" style="transition-delay:.16s;">
+        <div class="step-line"></div>
+        <div class="step-num">04</div>
+        <div class="step-body">
+          <div class="step-title">Wybierz tryb instalacji <span class="step-tag">INSTALLER</span></div>
+          <p class="step-desc">Po uruchomieniu z pendrive pojawi się menu bootloadera. Masz dwie opcje: <strong style="color:var(--white)">Graphical Install</strong> (graficzna, łatwiejsza) lub <strong style="color:var(--white)">Install</strong> (tekstowa, szybsza).</p>
+          <div class="code-block">
+            <pre><span class="comment">┌─────────────────────────────────────────┐</span>
+<span class="comment">│       Debian GNU/Linux Installer        │</span>
+<span class="comment">├─────────────────────────────────────────┤</span>
+<span class="flag">  ► Graphical install               </span><span class="comment">← WYBIERZ TO</span>
+<span class="cmd">    Install</span>
+<span class="cmd">    Advanced options ...</span>
+<span class="cmd">    Accessible dark contrast installer ...</span>
+<span class="comment">└─────────────────────────────────────────┘</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step reveal" style="transition-delay:.2s;">
+        <div class="step-line"></div>
+        <div class="step-num">05</div>
+        <div class="step-body">
+          <div class="step-title">Język, strefa czasowa, klawiatura <span class="step-tag">SETUP</span></div>
+          <p class="step-desc">Przejdź przez kolejne ekrany instalatora. Instalator jest intuicyjny — kliknij dalej po wyborze każdej opcji.</p>
+          <div class="code-block">
+            <pre><span class="kw">Język:</span>             <span class="flag">Polish (Polski)</span>
+<span class="kw">Kraj/Region:</span>       <span class="flag">Poland</span>
+<span class="kw">Układ klawiatury:</span>  <span class="flag">Polish</span>
+<span class="kw">Hostname:</span>          <span class="cmd">debian</span>        <span class="comment">← możesz zmienić na co chcesz</span>
+<span class="kw">Domain:</span>            <span class="cmd">local</span>         <span class="comment">← lub zostaw puste</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step reveal" style="transition-delay:.24s;">
+        <div class="step-line"></div>
+        <div class="step-num">06</div>
+        <div class="step-body">
+          <div class="step-title">Hasła i użytkownicy <span class="step-tag">USERS</span></div>
+          <p class="step-desc">Ustaw hasło root i utwórz konto użytkownika. Root to administrator systemu — nie używaj go na co dzień, tylko do zarządzania systemem.</p>
+          <div class="note"><span class="ni">⚠️</span>Hasło root musi być silne — min. 12 znaków, wielkie litery, cyfry, znaki specjalne. Możesz też zostawić root puste — wtedy sudo jest dostępne automatycznie dla użytkownika.</div>
+          <div class="code-block">
+            <pre><span class="kw">Root password:</span>     <span class="flag">••••••••••••</span>     <span class="comment">← silne hasło admina</span>
+<span class="kw">Full name:</span>         <span class="cmd">Mikołaj</span>
+<span class="kw">Username:</span>          <span class="cmd">mikolaj</span>          <span class="comment">← małe litery, bez spacji</span>
+<span class="kw">User password:</span>     <span class="flag">••••••••••••</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step reveal" style="transition-delay:.28s;">
+        <div class="step-line"></div>
+        <div class="step-num">07</div>
+        <div class="step-body">
+          <div class="step-title">Partycjonowanie dysku <span class="step-tag">DISK</span></div>
+          <p class="step-desc">Najważniejszy krok. Dla początkujących: <strong style="color:var(--white)">Guided — use entire disk</strong>. Dla zaawansowanych: ręczne partycjonowanie z LVM lub szyfrowaniem.</p>
+          <div class="note"><span class="ni">⚠️</span>UWAGA: partycjonowanie USUWA DANE z dysku! Zrób backup przed instalacją.</div>
+          <div class="code-block">
+            <pre><span class="comment"># Opcje partycjonowania (wybierz jedną):</span>
+<span class="flag">  ► Guided - use entire disk</span>           <span class="comment">← dla początkujących ✓</span>
+<span class="cmd">    Guided - use entire disk and LVM</span>     <span class="comment">← zaawansowani</span>
+<span class="cmd">    Guided - entire disk with encryption</span> <span class="comment">← z szyfrowaniem</span>
+<span class="cmd">    Manual</span>                               <span class="comment">← pełna kontrola</span>
+
+<span class="comment"># Zalecany schemat partycji (desktop):</span>
+<span class="kw">/boot/efi</span>   <span class="flag">512 MB</span>   <span class="cmd">FAT32</span>   <span class="comment">← tylko dla UEFI</span>
+<span class="kw">/</span>           <span class="flag">30 GB</span>    <span class="cmd">ext4</span>    <span class="comment">← system</span>
+<span class="kw">swap</span>        <span class="flag">4 GB</span>     <span class="cmd">swap</span>    <span class="comment">← pamięć wymiany</span>
+<span class="kw">/home</span>       <span class="flag">reszta</span>   <span class="cmd">ext4</span>    <span class="comment">← dane użytkownika</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step reveal" style="transition-delay:.32s;">
+        <div class="step-line"></div>
+        <div class="step-num">08</div>
+        <div class="step-body">
+          <div class="step-title">Wybór oprogramowania <span class="step-tag">PACKAGES</span></div>
+          <p class="step-desc">Instalator zapyta co chcesz zainstalować. Odznacz zbędne desktopy, wybierz środowisko graficzne. Na serwerze — odznacz wszystko z wyjątkiem SSH i standard utilities.</p>
+          <div class="code-block">
+            <pre><span class="comment"># Zaznacz czego potrzebujesz (spacja = zaznacz):</span>
+<span class="flag">  [✓] Debian desktop environment</span>
+<span class="flag">  [✓] GNOME</span>                       <span class="comment">← lub KDE/XFCE/inne</span>
+<span class="cmd">  [ ] ... Xfce</span>
+<span class="cmd">  [ ] ... KDE Plasma</span>
+<span class="flag">  [✓] standard system utilities</span>
+<span class="flag">  [✓] SSH server</span>                  <span class="comment">← WAŻNE: dodaj SSH!</span>
+<span class="cmd">  [ ] web server</span>                  <span class="comment">← niepotrzebne na desktopie</span>
+<span class="cmd">  [ ] print server</span>                <span class="comment">← jeśli nie drukujesz</span></pre>
+          </div>
+          <div class="note info"><span class="ni">ℹ️</span>Na serwerze bez GUI: odznacz wszystkie desktopy, zostaw tylko "standard system utilities" + "SSH server".</div>
+        </div>
+      </div>
+
+      <div class="step reveal" style="transition-delay:.36s;">
+        <div class="step-line"></div>
+        <div class="step-num">09</div>
+        <div class="step-body">
+          <div class="step-title">Instalacja bootloadera GRUB <span class="step-tag">GRUB</span></div>
+          <p class="step-desc">Na końcu instalator zainstaluje bootloader GRUB. Zaakceptuj domyślną opcję instalacji na głównym dysku. Bez GRUB system się nie uruchomi!</p>
+          <div class="code-block">
+            <pre><span class="comment"># Instalator zapyta:</span>
+<span class="cmd">"Install the GRUB boot loader to your primary drive?"</span>
+<span class="flag">  ► Yes</span>                  <span class="comment">← kliknij YES !</span>
+
+<span class="comment"># Wybierz dysk (zwykle pierwszy):</span>
+<span class="flag">  ► /dev/sda</span>             <span class="comment">← HDD / SATA SSD</span>
+<span class="cmd">    /dev/nvme0n1</span>          <span class="comment">← NVMe SSD (M.2)</span>
+<span class="cmd">    /dev/vda</span>              <span class="comment">← maszyna wirtualna</span></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="step reveal" style="transition-delay:.4s;">
+        <div class="step-num">10</div>
+        <div class="step-body">
+          <div class="step-title">Pierwsze uruchomienie i aktualizacja <span class="step-tag">DONE ✓</span></div>
+          <p class="step-desc">System gotowy! Wyjmij pendrive, uruchom ponownie. Po zalogowaniu wykonaj pierwszą aktualizację i zainstaluj przydatne pakiety. Debian działa!</p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">KOPIUJ</button>
+            <pre><span class="comment"># Zaloguj się jako root i zaktualizuj system:</span>
+<span class="kw">su -</span>
+<span class="cmd">apt update </span><span class="flag">&&</span> <span class="cmd">apt upgrade </span><span class="flag">-y</span>
+
+<span class="comment"># Zainstaluj przydatne narzędzia:</span>
+<span class="cmd">apt install </span><span class="flag">-y</span> <span class="cmd">sudo curl wget git neofetch htop nano vim</span>
+
+<span class="comment"># Dodaj swojego użytkownika do grupy sudo:</span>
+<span class="cmd">usermod </span><span class="flag">-aG</span> <span class="cmd">sudo mikolaj</span>
+
+<span class="comment"># Sprawdź wersję systemu:</span>
+<span class="cmd">cat /etc/debian_version</span>
+
+<span class="comment"># Pokaż info o systemie (neofetch):</span>
+<span class="cmd">neofetch</span></pre>
+          </div>
+          <div class="note success"><span class="ni">✅</span>Gotowe! Debian 12 "Bookworm" zainstalowany i skonfigurowany. Możesz teraz instalować pakiety przez <code style="color:var(--orange)">apt install</code> i korzystać z systemu.</div>
+          <div class="prompt"><span class="ps1">mikolaj@debian:~$</span><span>neofetch</span><span class="cursor"></span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <span><span class="status-dot"></span>debian.org — online</span>
+  <span>© 1997–2026 <a href="#">SPI</a> &amp; others &nbsp;·&nbsp; <a href="#">Licencja</a> &nbsp;·&nbsp; <a href="#">Kontakt</a></span>
+  <span>Debian 12 "Bookworm" · Kernel 6.1 LTS</span>
+</div>
+
+<script>
+/* ── STARS + SHOOTING STARS ── */
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas(){
+  canvas.width = window.innerWidth;
+  canvas.height = Math.max(document.body.scrollHeight, window.innerHeight);
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const STAR_COUNT = 400;
+const stars = Array.from({length: STAR_COUNT}, () => ({
+  x: Math.random() * 4000,
+  y: Math.random() * 5000,
+  r: Math.random() * 1.3 + 0.15,
+  o: Math.random() * 0.75 + 0.1,
+  spd: Math.random() * 0.008 + 0.002,
+  phase: Math.random() * Math.PI * 2
+}));
+
+const shoots = [];
+
+function spawnShoot(){
+  shoots.push({
+    x: Math.random() * canvas.width * 1.2,
+    y: Math.random() * canvas.height * 0.4,
+    len: Math.random() * 140 + 70,
+    speed: Math.random() * 9 + 6,
+    angle: Math.PI / 5 + (Math.random() - 0.5) * 0.4,
+    life: 1,
+    decay: Math.random() * 0.02 + 0.008,
+    w: Math.random() * 1.8 + 0.4
+  });
+}
+setInterval(spawnShoot, 1600);
+
+let frame = 0;
+function draw(){
+  frame++;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Stars
+  stars.forEach(s => {
+    const tw = Math.sin(frame * s.spd + s.phase) * 0.35 + 0.55;
+    const alpha = s.o * tw;
+    const cx = s.x % canvas.width;
+    const cy = s.y % canvas.height;
+
+    // glow for bigger stars
+    if(s.r > 0.9){
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, s.r * 4);
+      g.addColorStop(0, `rgba(220,235,255,${alpha * 0.4})`);
+      g.addColorStop(1, `rgba(180,210,255,0)`);
+      ctx.beginPath();
+      ctx.arc(cx, cy, s.r * 4, 0, Math.PI * 2);
+      ctx.fillStyle = g;
+      ctx.fill();
+    }
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(230,240,255,${alpha})`;
+    ctx.fill();
+  });
+
+  // Shooting stars
+  for(let i = shoots.length - 1; i >= 0; i--){
+    const s = shoots[i];
+    s.x += Math.cos(s.angle) * s.speed;
+    s.y += Math.sin(s.angle) * s.speed;
+    s.life -= s.decay;
+    if(s.life <= 0){ shoots.splice(i, 1); continue; }
+
+    const tail = {
+      x0: s.x, y0: s.y,
+      x1: s.x - Math.cos(s.angle) * s.len,
+      y1: s.y - Math.sin(s.angle) * s.len
+    };
+    const grd = ctx.createLinearGradient(tail.x0, tail.y0, tail.x1, tail.y1);
+    grd.addColorStop(0, `rgba(255,255,255,${s.life * 0.95})`);
+    grd.addColorStop(0.25, `rgba(210,230,255,${s.life * 0.5})`);
+    grd.addColorStop(1, `rgba(180,210,255,0)`);
+
+    ctx.beginPath();
+    ctx.moveTo(tail.x0, tail.y0);
+    ctx.lineTo(tail.x1, tail.y1);
+    ctx.strokeStyle = grd;
+    ctx.lineWidth = s.w * s.life;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    // head spark
+    const sg = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, s.w * 3);
+    sg.addColorStop(0, `rgba(255,255,255,${s.life})`);
+    sg.addColorStop(1, `rgba(255,255,255,0)`);
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.w * 3, 0, Math.PI * 2);
+    ctx.fillStyle = sg;
+    ctx.fill();
+  }
+
+  requestAnimationFrame(draw);
+}
+draw();
+
+// Expand canvas if content grows
+const ro = new ResizeObserver(() => resizeCanvas());
+ro.observe(document.body);
+
+/* ── CAROUSEL ── */
+let cur = 0;
+const ci = document.getElementById('ci');
+const dotEls = document.querySelectorAll('.dot');
+function goTo(n){ cur = n; ci.style.transform = `translateX(-${cur*100}%)`; dotEls.forEach((d,i)=>d.classList.toggle('active',i===cur)); }
+function slide(dir){ goTo((cur+dir+3)%3); }
+setInterval(()=>slide(1), 4200);
+
+/* ── SCROLL REVEAL ── */
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.06 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ── COPY BUTTONS ── */
+function copyCode(btn){
+  const text = btn.parentElement.querySelector('pre').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = 'SKOPIOWANO ✓';
+    btn.style.color = 'var(--green)';
+    btn.style.borderColor = 'var(--green)';
+    setTimeout(() => { btn.textContent = orig; btn.style.color = ''; btn.style.borderColor = ''; }, 2200);
+  });
+}
+</script>
+</body>
+</html>
